@@ -1,0 +1,22 @@
+{
+  "nitter_instances": [
+    "https://nitter.net",
+    "https://nitter.poast.org",
+    "https://nitter.privacydev.net"
+  ],
+  "targets": [
+    { "type": "user", "value": "WatcherGuru", "poll_interval_seconds": 300 },
+    { "type": "user", "value": "CoinDesk", "poll_interval_seconds": 600 },
+    { "type": "user", "value": "cz_binance", "poll_interval_seconds": 600 },
+    { "type": "hashtag", "value": "Bitcoin", "poll_interval_seconds": 900 },
+    { "type": "hashtag", "value": "Crypto", "poll_interval_seconds": 900 }
+  ],
+  "storage_path": "./data/nitter.db",
+  "max_requests_per_instance_per_minute": 20,
+  "user_agent": "Mozilla/5.0 (compatible; NitterScraperWeb/1.0)",
+  "media_download": false,
+  "log_path": "./data/nitter.log",
+  "backoff_base_seconds": 30,
+  "keep_only_last_n_per_target": null,
+  "enable_sse": true
+}

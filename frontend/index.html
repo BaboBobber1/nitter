@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nitter Scraper Web</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-6">
+      <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-3xl font-semibold tracking-tight">Nitter Scraper Dashboard</h1>
+          <p class="text-slate-400 text-sm">Konservativer Twitter/Nitter-Scraper ohne API-Schlüssel – respektvoller Abruf.</p>
+        </div>
+        <div class="flex flex-wrap gap-3 items-center">
+          <span id="connectionStatus" class="px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-400/40">Verbunden</span>
+          <button id="fetchOnceBtn" class="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-400 text-white transition">Fetch Once</button>
+          <button id="exportBtn" class="px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600 text-white transition">Export JSONL</button>
+          <button id="healthBtn" class="px-4 py-2 rounded-md bg-amber-500 hover:bg-amber-400 text-white transition">Self-Check</button>
+        </div>
+      </header>
+
+      <section class="flex flex-col md:flex-row gap-6">
+        <aside class="md:w-80 flex-shrink-0 space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-lg p-5">
+            <h2 class="font-semibold text-lg mb-3">Targets</h2>
+            <ul id="targetList" class="space-y-2 text-sm"></ul>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-lg p-5">
+            <h2 class="font-semibold text-lg mb-3">Neues Target</h2>
+            <form id="targetForm" class="space-y-4">
+              <label class="block text-sm font-medium text-slate-300">Typ</label>
+              <select id="targetType" class="w-full rounded-md bg-slate-950 border border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500">
+                <option value="user">User</option>
+                <option value="hashtag">Hashtag</option>
+              </select>
+              <label class="block text-sm font-medium text-slate-300">Wert</label>
+              <input id="targetValue" type="text" required placeholder="z. B. Bitcoin" class="w-full rounded-md bg-slate-950 border border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500" />
+              <label class="block text-sm font-medium text-slate-300">Intervall (Sekunden)</label>
+              <input id="targetInterval" type="number" min="60" step="60" value="300" class="w-full rounded-md bg-slate-950 border border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500" />
+              <button class="w-full px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 transition" type="submit">Speichern</button>
+              <p id="formError" class="text-rose-400 text-sm"></p>
+            </form>
+          </div>
+        </aside>
+
+        <main class="flex-1 space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-lg p-5">
+            <nav class="flex gap-3 text-sm">
+              <button class="tab-button active" data-tab="timeline">Timeline</button>
+              <button class="tab-button" data-tab="status">Status</button>
+              <button class="tab-button" data-tab="settings">Settings</button>
+            </nav>
+            <div class="mt-4 space-y-6">
+              <section id="tab-timeline" class="tab-panel">
+                <div class="flex flex-wrap gap-3 items-end">
+                  <div>
+                    <label class="block text-xs uppercase tracking-wide text-slate-400">Target</label>
+                    <select id="timelineTargetFilter" class="rounded-md bg-slate-950 border border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500">
+                      <option value="">Alle</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs uppercase tracking-wide text-slate-400">Limit</label>
+                    <select id="timelineLimit" class="rounded-md bg-slate-950 border border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500">
+                      <option value="20">20</option>
+                      <option value="50" selected>50</option>
+                      <option value="100">100</option>
+                    </select>
+                  </div>
+                  <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs uppercase tracking-wide text-slate-400">Suche</label>
+                    <input id="timelineSearch" type="search" placeholder="Filter Text" class="w-full rounded-md bg-slate-950 border border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500" />
+                  </div>
+                </div>
+                <ul id="timelineList" class="mt-6 space-y-4 max-h-[70vh] overflow-y-auto pr-2"></ul>
+              </section>
+              <section id="tab-status" class="tab-panel hidden">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div class="bg-slate-950 border border-slate-800 rounded-lg p-4">
+                    <h3 class="font-medium text-slate-200 mb-2">Instanzen</h3>
+                    <ul id="instanceStatus" class="space-y-2 text-sm"></ul>
+                  </div>
+                  <div class="bg-slate-950 border border-slate-800 rounded-lg p-4">
+                    <h3 class="font-medium text-slate-200 mb-2">Letzte Meldungen</h3>
+                    <ul id="eventLog" class="space-y-2 text-xs text-slate-400 max-h-64 overflow-y-auto"></ul>
+                  </div>
+                </div>
+              </section>
+              <section id="tab-settings" class="tab-panel hidden">
+                <div class="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-4 text-sm">
+                  <div>
+                    <h3 class="font-semibold text-slate-100">Nitter Instanzen</h3>
+                    <p id="settingsInstances" class="text-slate-400"></p>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-slate-100">User-Agent</h3>
+                    <code id="settingsUA" class="text-slate-300"></code>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-slate-100">Hinweis</h3>
+                    <p class="text-slate-400">Konfiguration erfolgt über <code class="text-slate-200">backend/config.json</code>. Änderungen hier wirken sich nur nach einem Neustart aus.</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </main>
+      </section>
+    </div>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
